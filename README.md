@@ -3,3 +3,6 @@
 
 # STRUCTURAL MODEL
 ![activity context chart model](https://github.com/Lynnvanessa/DinnerDice/assets/55311795/4ac65529-4d04-492e-ad02-56eac7da3d0d)
+
+# CONTEXT MODEL
+![Blank diagram (1)](https://github.com/Lynnvanessa/DinnerDice/assets/55311795/edc4c667-2462-4cfd-9acc-80db113efcb5)
