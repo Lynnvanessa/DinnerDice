@@ -2,7 +2,7 @@
 <img height="500" alt="uml" src="https://github.com/Lynnvanessa/DinnerDice/assets/55311795/f508ea0c-dd3c-4b0a-99cf-b52f4b55e57c">
 
 # METHODOLOGY
-The software engineering suitable for this project will be waterfall methodology which has a sequential flow i.e analysis phase, design phase, development phase, and testing phase where each phase has to be complete before the beginning of the next phase.This is a small project with clearly stated phases hence for it to work there must be an order of activities which must be completed for success of the next.Thus suitability of waterfall methodology
+The software engineering methodology suitable for this project is waterfall methodology which has a sequential flow i.e analysis phase, design phase, development phase, and testing phase where each phase has to be complete before the beginning of the next phase.This is a small project with clearly stated phases hence for it to be a success there must be an order of activities which must be completed for success of the next, thus suitability of waterfall methodology
 
 # CONTEXT MODEL
 ![Blank diagram (1)](https://github.com/Lynnvanessa/DinnerDice/assets/55311795/edc4c667-2462-4cfd-9acc-80db113efcb5)
