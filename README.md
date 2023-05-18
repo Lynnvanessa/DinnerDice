@@ -8,4 +8,7 @@
 ![Blank diagram (1)](https://github.com/Lynnvanessa/DinnerDice/assets/55311795/edc4c667-2462-4cfd-9acc-80db113efcb5)
 
 # UML DIAGRAM
-<img width="1986" alt="uml" src="https://github.com/Lynnvanessa/DinnerDice/assets/55311795/f508ea0c-dd3c-4b0a-99cf-b52f4b55e57c">
+<img height="500" alt="uml" src="https://github.com/Lynnvanessa/DinnerDice/assets/55311795/f508ea0c-dd3c-4b0a-99cf-b52f4b55e57c">
+
+# BEHAVIOURAL MODEL
+<img height="500" alt="usecase" src="https://github.com/Lynnvanessa/DinnerDice/assets/55311795/9087e276-f8d2-4e9e-b9a8-4bce758f2e54">
