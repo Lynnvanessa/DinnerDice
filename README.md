@@ -1,6 +1,9 @@
 # INTERACTION MODEL
 <img height="500" alt="Untitled (2)" src="https://github.com/Lynnvanessa/DinnerDice/assets/55311795/ee9ffdb8-b5c7-489e-94ce-0c8fdb6b0cb9">
 
+# METHODOLOGY
+The software engineering suitable for this project will be waterfall methodology which has a sequential flow i.e analysis phase, design phase, development phase, and testing phase where each phase has to be complete before the beginning of the next phase.This is a small project with clearly stated phases hence for it to work there must be an order of activities which must be completed for success of the next.Thus suitability of waterfall methodology
+
 # STRUCTURAL MODEL
 ![activity context chart model](https://github.com/Lynnvanessa/DinnerDice/assets/55311795/4ac65529-4d04-492e-ad02-56eac7da3d0d)
 
