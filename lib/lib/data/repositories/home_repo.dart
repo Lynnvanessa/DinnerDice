@@ -11,6 +11,7 @@ import '../../utils/functions.dart';
 class HomeRepo extends BaseRepo {
   List<SearchResult> restaurants = [];
   SearchResult? selectedRestaurant;
+  String? nextPageToken;
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -52,8 +53,7 @@ class HomeRepo extends BaseRepo {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<void> getRestaurants() async {
-    selectedRestaurant = null;
+  Future<List<SearchResult>> _getNearbyRestaurants({String? pageToken}) async {
     final position = await _getCurrentLocation();
     final googlePlace = GooglePlace(MAPS_API_KEY);
     final result = await googlePlace.search.getNearBySearch(
@@ -63,16 +63,28 @@ class HomeRepo extends BaseRepo {
       ),
       1500,
       type: "restaurant",
+      opennow: true,
+      pagetoken: pageToken,
     );
     if (result == null) {
       showToast("Failed to process the request, please try again");
-      return;
+      return [];
     }
+    nextPageToken = result.nextPageToken;
+
     if (result.results == null || result.results?.isEmpty == true) {
       showToast("No restaurants found");
-      return;
+      return [];
     }
-    restaurants = result.results ?? [];
+    return result.results ?? [];
+  }
+
+  Future<void> getRestaurants() async {
+    selectedRestaurant = null;
+    restaurants = [];
+    nextPageToken = null;
+
+    restaurants = await _getNearbyRestaurants();
 
     //get random restaurant from list
     if (restaurants.isNotEmpty) {
@@ -80,5 +92,9 @@ class HomeRepo extends BaseRepo {
       final index = random.nextInt(restaurants.length - 1);
       selectedRestaurant = restaurants[index];
     }
+  }
+
+  Future<void> getMoreRestaurants() async {
+    restaurants.addAll(await _getNearbyRestaurants(pageToken: nextPageToken));
   }
 }
