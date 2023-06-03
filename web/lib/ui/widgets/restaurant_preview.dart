@@ -68,29 +68,30 @@ class RestaurantPreview extends StatelessWidget {
                       ),
                       Text(restaurant.vicinity ?? ""),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            alignment: Alignment.centerRight,
-                            margin: const EdgeInsets.only(top: 8),
-                            child: restaurant.rating == null
-                                ? const Text("No rating")
-                                : Wrap(
-                                    children: [
-                                      RatingBarIndicator(
-                                        itemBuilder: (context, inedx) =>
-                                            const Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              margin: const EdgeInsets.only(top: 8),
+                              child: restaurant.rating == null
+                                  ? const Text("No rating")
+                                  : Wrap(
+                                      children: [
+                                        RatingBarIndicator(
+                                          itemBuilder: (context, inedx) =>
+                                              const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          itemCount: 5,
+                                          itemSize: 20,
+                                          rating: restaurant.rating ?? 0.0,
                                         ),
-                                        itemCount: 5,
-                                        itemSize: 20,
-                                        rating: restaurant.rating ?? 0.0,
-                                      ),
-                                      Text(
-                                          "(${restaurant.rating})(${restaurant.userRatingsTotal})")
-                                    ],
-                                  ),
+                                        Text(
+                                            "(${restaurant.rating})(${restaurant.userRatingsTotal})")
+                                      ],
+                                    ),
+                            ),
                           ),
                           Container(
                             margin: const EdgeInsets.only(left: 8),

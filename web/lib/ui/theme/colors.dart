@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
-  static Color primary = const Color(0xFF9A6402);
+abstract class AppColors {
+  // static Color primary = const Color(0xFF9A6402);
+  static Color primary = const Color(0xFFF2A900);
   static Color surface = const Color(0xFFFFFFFF);
   static Color onSurface = const Color(0xFF242424);
   static Color surfaceVariant = const Color(0xFFF1F1F1);
+  static Color onDisabledSurface = const Color(0xFF000000);
+  static Color disabledSurface = const Color(0xFFA1A1A1);
 
   static MaterialColor createMaterialColor(Color color) {
     List strengths = <double>[.05];

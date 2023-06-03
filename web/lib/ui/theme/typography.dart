@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AppTypography {
+abstract class AppTypography {
   static TextStyle bodyBold({Color? color}) => TextStyle(
         fontWeight: FontWeight.bold,
         color: color,
@@ -12,8 +12,14 @@ class AppTypography {
       );
 
   static TextStyle headline({Color? color}) => TextStyle(
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w900,
         color: color,
         fontSize: 24,
+      );
+
+  static TextStyle subHeadline({Color? color}) => TextStyle(
+        fontWeight: FontWeight.bold,
+        color: color,
+        fontSize: 20,
       );
 }

@@ -61,18 +61,24 @@ class HomeRepo extends BaseRepo {
         lat: position.latitude,
         lng: position.longitude,
       ),
-      1500,
+      5000,
       type: "restaurant",
       opennow: true,
       pagetoken: pageToken,
     );
     if (result == null) {
-      showToast("Failed to process the request, please try again");
+      if (pageToken != null) {
+        //retry the fetch
+        return await _getNearbyRestaurants(pageToken: pageToken);
+      } else {
+        showToast("Failed to process the request, please try again");
+      }
       return [];
     }
     nextPageToken = result.nextPageToken;
 
-    if (result.results == null || result.results?.isEmpty == true) {
+    if ((result.results == null || result.results?.isEmpty == true) &&
+        pageToken == null) {
       showToast("No restaurants found");
       return [];
     }
