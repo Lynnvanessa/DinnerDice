@@ -1,9 +1,13 @@
-import 'package:diner_dice/utils/consts.dart';
-import 'package:diner_dice/utils/functions.dart';
+import 'package:diner_dice/data/providers/home_provider.dart';
+import 'package:diner_dice/ui/theme/colors.dart';
+import 'package:diner_dice/ui/theme/typography.dart';
+import 'package:diner_dice/ui/widgets/buttons/filled_btn.dart';
+import 'package:diner_dice/ui/widgets/inputs/select_input.dart';
+import 'package:diner_dice/ui/widgets/restaurant_preview.dart';
+// import 'package:diner_dice/utils/consts.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_place/google_place.dart';
-import 'package:location/location.dart' as loc;
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,86 +17,166 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  final List<InputOption> options = List.empty(growable: true);
+  InputOption? selectedOption;
+  HomeProvider get _homeProvider => context.read<HomeProvider>();
 
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      final location = loc.Location();
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        //Location services are not enabled
-        showToast("Location services are not enabled");
-        return Future.error('Location services are not enabled.');
-      }
-    }
+  // final topBanner = BannerAd(
+  //   size: AdSize.banner,
+  //   adUnitId: BANNER_AD_UNIT_ID,
+  //   listener: const BannerAdListener(),
+  //   request: const AdRequest(),
+  // );
+  // final bottomBanner = BannerAd(
+  //   size: AdSize.banner,
+  //   adUnitId: BANNER_AD_UNIT_ID,
+  //   listener: const BannerAdListener(),
+  //   request: const AdRequest(),
+  // );
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
-
-  Future<void> determinePosition() async {
-    final position = await _determinePosition();
-    print(position.toJson());
-  }
-
-  Future<void> getNearbyRestaurants() async {
-    await _determinePosition()
-        .catchError(
-      (stackTrrace) {},
-    )
-        .then((position) async {
-      final googlePlace = GooglePlace(MAPS_API_KEY);
-      final result = await googlePlace.search.getNearBySearch(
-        Location(
-          lat: position.latitude,
-          lng: position.longitude,
-        ),
-        1500,
-        type: "restaurant",
-      );
-      if (result == null) {
-        showToast("Failed to process the request, please try again");
-        return;
-      }
-      if (result.results == null || result.results?.isEmpty == true) {
-        showToast("No restaurants found");
-        return;
-      }
-      //select random restaurant
-    });
+  @override
+  void initState() {
+    super.initState();
+    options
+      ..add(const InputOption("All", "restaurant"))
+      ..add(const InputOption("Takeaways", "meal_takeaway"));
+    selectedOption = options[0];
+    // topBanner.load();
+    // bottomBanner.load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
       body: Center(
-        child: InkWell(
-          onTap: getNearbyRestaurants,
-          child: const Text("Roll Dice"),
-        ),
+        child: Consumer<HomeProvider>(builder: (context, provider, child) {
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.only(top: 30),
+                  child: Image.asset(
+                    "assets/icons/logo.png",
+                    width: 70,
+                  ),
+                ),
+                Text(
+                  "Diner Dice",
+                  style: AppTypography.headline(
+                    color: AppColors.primary,
+                  ),
+                ),
+                // Container(
+                //   margin: const EdgeInsets.only(bottom: 40),
+                //   child: AdWidget(ad: topBanner),
+                //   height: topBanner.size.height.toDouble(),
+                // ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "Let The Dice Decide Dinner",
+                    textAlign: TextAlign.center,
+                    style: AppTypography.subHeadline(),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      provider.selectedRestaurant != null
+                          ? OutlinedButton(
+                              onPressed: () {
+                                provider.clear();
+                              },
+                              child: Text(
+                                "Refresh",
+                                style: TextStyle(color: AppColors.onSurface),
+                              ),
+                            )
+                          : const SizedBox(),
+                      SelectInput(
+                        options: options,
+                        onChanged: (value) => setState(() {
+                          selectedOption = value;
+                          _homeProvider.setType(value);
+                        }),
+                        value: selectedOption,
+                      ),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: provider.selectedRestaurant != null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: 10, left: 12, right: 12),
+                        child: Text(
+                          "Dice's pick",
+                          style:
+                              AppTypography.bodyBold(color: AppColors.primary),
+                        ),
+                      ),
+                      if (provider.selectedRestaurant != null)
+                        RestaurantPreview(
+                          provider.selectedRestaurant!,
+                          isDiceSelected: true,
+                        ),
+                    ],
+                  ),
+                  replacement: Container(
+                    height: 200,
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      provider.searching
+                          ? "assets/icons/dice_rolling.gif"
+                          : "assets/icons/double_dice.jpeg",
+                      width: provider.searching ? 80 : 200,
+                    ),
+                  ),
+                ),
+                if (provider.restaurants.length > 1)
+                  Visibility(
+                    visible:
+                        provider.restaurants.isNotEmpty && !provider.searching,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.center,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed("restaurants/nearby");
+                        },
+                        child: Text(
+                            "see ${provider.restaurants.length - 1}+ other nearby places"),
+                      ),
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  margin: const EdgeInsets.only(bottom: 60, top: 40),
+                  child: FilledBtn(
+                    onClicked: () => provider.getRestaurants(),
+                    text: "Roll the Dice",
+                    enabled: !provider.searching,
+                  ),
+                ),
+                // Container(
+                //   margin: const EdgeInsets.only(top: 40),
+                //   child: AdWidget(ad: bottomBanner),
+                //   height: bottomBanner.size.height.toDouble(),
+                // ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
