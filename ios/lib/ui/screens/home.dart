@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     options
-      ..add(const InputOption("Restaurants", "restaurant"))
+      ..add(const InputOption("All", "restaurant"))
       ..add(const InputOption("Takeaways", "meal_takeaway"));
     selectedOption = options[0];
     // topBanner.load();
@@ -58,10 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.only(top: 40),
+                  padding: const EdgeInsets.only(top: 30),
                   child: Image.asset(
                     "assets/icons/logo.png",
-                    width: 100,
+                    width: 70,
                   ),
                 ),
                 Text(
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 provider.clear();
                               },
                               child: Text(
-                                "Clear",
+                                "Refresh",
                                 style: TextStyle(color: AppColors.onSurface),
                               ),
                             )
@@ -143,21 +143,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                Visibility(
-                  visible:
-                      provider.restaurants.isNotEmpty && !provider.searching,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    alignment: Alignment.center,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).pushNamed("restaurants/nearby");
-                      },
-                      child: Text(
-                          "see ${provider.restaurants.length - 1}+ other nearby restaurants"),
+                if (provider.restaurants.length > 1)
+                  Visibility(
+                    visible:
+                        provider.restaurants.isNotEmpty && !provider.searching,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.center,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed("restaurants/nearby");
+                        },
+                        child: Text(
+                            "see ${provider.restaurants.length - 1}+ other nearby places"),
+                      ),
                     ),
                   ),
-                ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   margin: const EdgeInsets.only(bottom: 60, top: 40),

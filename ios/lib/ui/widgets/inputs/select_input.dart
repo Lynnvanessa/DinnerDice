@@ -21,10 +21,15 @@ class SelectInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<InputOption>(
+      alignment: Alignment.center,
       value: value,
       items: options
           .map((option) => DropdownMenuItem<InputOption>(
-                child: Text(option.label),
+                alignment: Alignment.center,
+                child: Text(
+                  option.label,
+                  textAlign: TextAlign.center,
+                ),
                 value: option,
               ))
           .toList(),

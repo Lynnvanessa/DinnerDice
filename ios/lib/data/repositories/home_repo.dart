@@ -8,7 +8,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_place/google_place.dart';
 import 'package:location/location.dart' as loc;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:http/http.dart' as http;
 
 import '../../utils/functions.dart';
 
@@ -17,7 +16,7 @@ class HomeRepo extends BaseRepo {
   SearchResult? selectedRestaurant;
   String? nextPageToken;
   String type = "restaurant";
-  List<SearchResult> _previouslySelectedRestaurants = [];
+  final List<SearchResult> _previouslySelectedRestaurants = [];
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -75,15 +74,19 @@ class HomeRepo extends BaseRepo {
     }
     final googlePlace = GooglePlace(MAPS_API_KEY, headers: headers);
     final result = await googlePlace.search.getNearBySearch(
-      Location(
-        lat: 54.5181885,
-        lng: -1.5675516,
-      ),
+      kDebugMode
+          ? Location(
+              lat: 54.5181885,
+              lng: -1.5675516,
+            )
+          : Location(
+              lat: position.latitude,
+              lng: position.longitude,
+            ),
       5000,
       type: type,
       opennow: true,
       pagetoken: pageToken,
-      rankby: RankBy.Prominence,
     );
 
     if (result == null) {
@@ -108,7 +111,14 @@ class HomeRepo extends BaseRepo {
   Future<void> getRestaurants() async {
     selectedRestaurant = null;
 
-    restaurants.addAll(await _getNearbyRestaurants(pageToken: nextPageToken));
+    final fetchedRestaurants =
+        await _getNearbyRestaurants(pageToken: nextPageToken);
+    fetchedRestaurants.removeWhere((fetched) =>
+        restaurants.indexWhere((existing) =>
+            fetched.name == existing.name &&
+            fetched.vicinity == existing.vicinity) !=
+        -1);
+    restaurants.addAll(fetchedRestaurants);
 
     //get random restaurant from list
     if (restaurants.isNotEmpty) {
@@ -133,6 +143,7 @@ class HomeRepo extends BaseRepo {
   }
 
   void clear() {
+    _previouslySelectedRestaurants.clear();
     restaurants.clear();
     nextPageToken = null;
     selectedRestaurant = null;
