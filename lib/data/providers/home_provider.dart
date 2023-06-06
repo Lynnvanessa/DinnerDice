@@ -6,7 +6,7 @@ import 'package:google_place/google_place.dart';
 class HomeProvider extends ChangeNotifier {
   final _repo = HomeRepo();
   List<SearchResult> get restaurants => _repo.restaurants;
-  SearchResult? get selectedRestaurant => _repo.selectedRestaurant;
+  SearchResult? get selectedRestaurant => _repo.suggestedRestaurant;
   bool get hasNextPage => _repo.nextPageToken != null;
   bool isLoadingMore = false;
   bool searching = false;

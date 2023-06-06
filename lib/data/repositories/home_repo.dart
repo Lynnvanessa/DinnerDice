@@ -13,10 +13,10 @@ import '../../utils/functions.dart';
 
 class HomeRepo extends BaseRepo {
   List<SearchResult> restaurants = [];
-  SearchResult? selectedRestaurant;
+  SearchResult? suggestedRestaurant;
   String? nextPageToken;
   String type = "restaurant";
-  final List<SearchResult> _previouslySelectedRestaurants = [];
+  final List<SearchResult> _previouslySuggestedRestaurants = [];
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -91,17 +91,17 @@ class HomeRepo extends BaseRepo {
 
     if (result == null) {
       if (pageToken != null) {
-        //retry the fetch
+        // was a fetch more request
+        // retry the fetch
         return await _getNearbyRestaurants(pageToken: pageToken);
       } else {
         showToast("Failed to process the request, please try again");
+        return [];
       }
-      return [];
     }
     nextPageToken = result.nextPageToken;
 
-    if ((result.results == null || result.results?.isEmpty == true) &&
-        pageToken == null) {
+    if (result.results!.isEmpty && pageToken == null) {
       showToast("No restaurants found");
       return [];
     }
@@ -109,31 +109,49 @@ class HomeRepo extends BaseRepo {
   }
 
   Future<void> getRestaurants() async {
-    selectedRestaurant = null;
+    suggestedRestaurant = null;
 
     final fetchedRestaurants =
         await _getNearbyRestaurants(pageToken: nextPageToken);
-    fetchedRestaurants.removeWhere((fetched) =>
-        restaurants.indexWhere((existing) =>
-            fetched.name == existing.name &&
-            fetched.vicinity == existing.vicinity) !=
+
+    // remove duplicates
+    fetchedRestaurants.removeWhere((fetchedRestaurant) =>
+        restaurants.indexWhere((initiallyFetchedRestaurant) =>
+            fetchedRestaurant.placeId == initiallyFetchedRestaurant.placeId) !=
         -1);
     restaurants.addAll(fetchedRestaurants);
 
-    //get random restaurant from list
-    if (restaurants.isNotEmpty) {
-      final random = Random();
-      List<SearchResult> restaurantsClone = List.from(restaurants);
-      restaurantsClone.removeWhere((res) => _previouslySelectedRestaurants
-          .any((ps) => ps.placeId == res.placeId || ps.name == res.name));
-      if (restaurantsClone.isEmpty) {
-        restaurantsClone.addAll(_previouslySelectedRestaurants);
+    /*suggesting a random restaurant */
+    final restaurantSuggestions = [...restaurants];
+    // remove restaurants with similar names even if the vicinity is different
+    final cleanedSuggestions = [...restaurantSuggestions];
+    for (final suggestion in restaurantSuggestions) {
+      while (
+          cleanedSuggestions.where((it) => it.name == suggestion.name).length >
+              1) {
+        cleanedSuggestions.removeWhere((it) => it.name == suggestion.name);
       }
-      restaurantsClone.shuffle();
-      final index = random.nextInt(restaurantsClone.length - 1);
-      selectedRestaurant = restaurantsClone[index];
-      _previouslySelectedRestaurants.add(selectedRestaurant!);
     }
+    restaurantSuggestions
+      ..clear()
+      ..addAll(cleanedSuggestions);
+
+    // remove initially suggested
+    restaurantSuggestions.removeWhere((suggestion) =>
+        _previouslySuggestedRestaurants.indexWhere(
+            (previouslySuggestedRestaurant) =>
+                previouslySuggestedRestaurant.placeId == suggestion.placeId) !=
+        -1);
+    if (restaurantSuggestions.isEmpty) {
+      // TODO - warn of the possibility of seeing duplicate suggestions
+      _previouslySuggestedRestaurants.clear();
+      restaurantSuggestions.addAll(restaurants);
+    }
+
+    // select a random restaurant
+    final randomIndex = Random().nextInt(restaurantSuggestions.length);
+    suggestedRestaurant = restaurantSuggestions[randomIndex];
+    _previouslySuggestedRestaurants.add(suggestedRestaurant!);
   }
 
   Future<void> getMoreRestaurants() async {
@@ -143,9 +161,9 @@ class HomeRepo extends BaseRepo {
   }
 
   void clear() {
-    _previouslySelectedRestaurants.clear();
+    _previouslySuggestedRestaurants.clear();
     restaurants.clear();
     nextPageToken = null;
-    selectedRestaurant = null;
+    suggestedRestaurant = null;
   }
 }
