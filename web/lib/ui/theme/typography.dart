@@ -14,12 +14,12 @@ abstract class AppTypography {
   static TextStyle headline({Color? color}) => TextStyle(
         fontWeight: FontWeight.w900,
         color: color,
-        fontSize: 24,
+        fontSize: 22,
       );
 
   static TextStyle subHeadline({Color? color}) => TextStyle(
         fontWeight: FontWeight.bold,
         color: color,
-        fontSize: 20,
+        fontSize: 18,
       );
 }

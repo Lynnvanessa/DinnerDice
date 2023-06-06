@@ -49,5 +49,7 @@
 		<string>This app needs access to location when in the background in order to continue navigation to selected restaurants.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
-	</dict>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+</dict>
 </plist>
