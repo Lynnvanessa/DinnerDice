@@ -1,14 +1,19 @@
+import 'package:diner_dice/data/models/alert.dart';
+import 'package:diner_dice/data/models/nearby_place.dart';
 import 'package:diner_dice/data/repositories/home_repo.dart';
+import 'package:diner_dice/ui/widgets/inputs/select_input.dart';
 import 'package:flutter/material.dart';
-import 'package:google_place/google_place.dart';
 
 class HomeProvider extends ChangeNotifier {
   final _repo = HomeRepo();
-  List<SearchResult> get restaurants => _repo.restaurants;
-  SearchResult? get selectedRestaurant => _repo.selectedRestaurant;
+  void onChange() => notifyListeners();
+  List<NearbyPlace> get restaurants => _repo.restaurants;
+  NearbyPlace? get selectedRestaurant => _repo.suggestedRestaurant;
   bool get hasNextPage => _repo.nextPageToken != null;
   bool isLoadingMore = false;
   bool searching = false;
+
+  List<Alert> get alerts => _repo.alerts;
 
   Future<void> getRestaurants() async {
     searching = true;
@@ -34,6 +39,17 @@ class HomeProvider extends ChangeNotifier {
     } catch (e) {}
 
     isLoadingMore = false;
+    notifyListeners();
+  }
+
+  void setType(InputOption? option) {
+    _repo.clear();
+    _repo.type = option?.value ?? "restaurant";
+    notifyListeners();
+  }
+
+  void clear() {
+    _repo.clear();
     notifyListeners();
   }
 }
