@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:diner_dice/data/models/nearby_place.dart';
 import 'package:diner_dice/ui/theme/colors.dart';
 import 'package:diner_dice/ui/theme/typography.dart';
 import 'package:diner_dice/ui/widgets/rectangular_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:google_place/google_place.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 
 class RestaurantPreview extends StatelessWidget {
@@ -13,15 +13,15 @@ class RestaurantPreview extends StatelessWidget {
     Key? key,
     this.isDiceSelected = false,
   }) : super(key: key);
-  final SearchResult restaurant;
+  final NearbyPlace restaurant;
 
   /// [isDiceSelected] whether it has been selected by the dice roll
   final bool isDiceSelected;
 
   void _try() {
     MapsLauncher.launchCoordinates(
-      restaurant.geometry?.location?.lat ?? 0,
-      restaurant.geometry?.location?.lng ?? 0,
+      restaurant.geometry.location.lat ?? 0,
+      restaurant.geometry.location.lng ?? 0,
       restaurant.name,
     );
   }
@@ -88,7 +88,7 @@ class RestaurantPreview extends StatelessWidget {
                                           rating: restaurant.rating ?? 0.0,
                                         ),
                                         Text(
-                                            "(${restaurant.rating})(${restaurant.userRatingsTotal})")
+                                            "(${restaurant.rating})(${restaurant.userRatingTotal})")
                                       ],
                                     ),
                             ),

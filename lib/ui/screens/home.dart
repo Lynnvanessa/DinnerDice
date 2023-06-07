@@ -2,6 +2,7 @@ import 'package:diner_dice/data/providers/home_provider.dart';
 import 'package:diner_dice/ui/theme/colors.dart';
 import 'package:diner_dice/ui/theme/typography.dart';
 import 'package:diner_dice/ui/widgets/buttons/filled_btn.dart';
+import 'package:diner_dice/ui/widgets/in_app_alert.dart';
 import 'package:diner_dice/ui/widgets/inputs/select_input.dart';
 import 'package:diner_dice/ui/widgets/restaurant_preview.dart';
 // import 'package:diner_dice/utils/consts.dart';
@@ -49,132 +50,151 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Center(
+      body: SafeArea(
         child: Consumer<HomeProvider>(builder: (context, provider, child) {
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.only(top: 30),
-                  child: Image.asset(
-                    "assets/icons/logo.png",
-                    width: 70,
-                  ),
-                ),
-                Text(
-                  "Diner Dice",
-                  style: AppTypography.headline(
-                    color: AppColors.primary,
-                  ),
-                ),
-                // Container(
-                //   margin: const EdgeInsets.only(bottom: 40),
-                //   child: AdWidget(ad: topBanner),
-                //   height: topBanner.size.height.toDouble(),
-                // ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    "Let The Dice Decide Dinner",
-                    textAlign: TextAlign.center,
-                    style: AppTypography.subHeadline(),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return Stack(
+            children: [
+              Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      provider.selectedRestaurant != null
-                          ? OutlinedButton(
+                      Container(
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          "assets/icons/logo.png",
+                          width: 70,
+                        ),
+                      ),
+                      Text(
+                        "Diner Dice",
+                        style: AppTypography.headline(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      // Container(
+                      //   margin: const EdgeInsets.only(bottom: 40),
+                      //   child: AdWidget(ad: topBanner),
+                      //   height: topBanner.size.height.toDouble(),
+                      // ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          "Let The Dice Decide Dinner",
+                          textAlign: TextAlign.center,
+                          style: AppTypography.subHeadline(),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            provider.selectedRestaurant != null
+                                ? OutlinedButton(
+                                    onPressed: () {
+                                      provider.clear();
+                                    },
+                                    child: Text(
+                                      "Refresh",
+                                      style:
+                                          TextStyle(color: AppColors.onSurface),
+                                    ),
+                                  )
+                                : const SizedBox(),
+                            SelectInput(
+                              options: options,
+                              onChanged: (value) => setState(() {
+                                selectedOption = value;
+                                _homeProvider.setType(value);
+                              }),
+                              value: selectedOption,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Visibility(
+                        visible: provider.selectedRestaurant != null,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 10, left: 12, right: 12),
+                              child: Text(
+                                "Dice's pick",
+                                style: AppTypography.bodyBold(
+                                    color: AppColors.primary),
+                              ),
+                            ),
+                            if (provider.selectedRestaurant != null)
+                              RestaurantPreview(
+                                provider.selectedRestaurant!,
+                                isDiceSelected: true,
+                              ),
+                          ],
+                        ),
+                        replacement: Container(
+                          height: 200,
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            provider.searching
+                                ? "assets/icons/dice_rolling.gif"
+                                : "assets/icons/double_dice.jpeg",
+                            width: provider.searching ? 80 : 200,
+                          ),
+                        ),
+                      ),
+                      if (provider.restaurants.length > 1)
+                        Visibility(
+                          visible: provider.restaurants.isNotEmpty &&
+                              !provider.searching,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            alignment: Alignment.center,
+                            child: OutlinedButton(
                               onPressed: () {
-                                provider.clear();
+                                Navigator.of(context)
+                                    .pushNamed("restaurants/nearby");
                               },
                               child: Text(
-                                "Refresh",
-                                style: TextStyle(color: AppColors.onSurface),
-                              ),
-                            )
-                          : const SizedBox(),
-                      SelectInput(
-                        options: options,
-                        onChanged: (value) => setState(() {
-                          selectedOption = value;
-                          _homeProvider.setType(value);
-                        }),
-                        value: selectedOption,
+                                  "see ${provider.restaurants.length - 1}+ other nearby places"),
+                            ),
+                          ),
+                        ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        margin: const EdgeInsets.only(bottom: 60, top: 40),
+                        child: FilledBtn(
+                          onClicked: () => provider.getRestaurants(),
+                          text: "Roll the Dice",
+                          enabled: !provider.searching,
+                        ),
                       ),
+                      // Container(
+                      //   margin: const EdgeInsets.only(top: 40),
+                      //   child: AdWidget(ad: bottomBanner),
+                      //   height: bottomBanner.size.height.toDouble(),
+                      // ),
                     ],
                   ),
                 ),
-                Visibility(
-                  visible: provider.selectedRestaurant != null,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(top: 10, left: 12, right: 12),
-                        child: Text(
-                          "Dice's pick",
-                          style:
-                              AppTypography.bodyBold(color: AppColors.primary),
-                        ),
-                      ),
-                      if (provider.selectedRestaurant != null)
-                        RestaurantPreview(
-                          provider.selectedRestaurant!,
-                          isDiceSelected: true,
-                        ),
-                    ],
-                  ),
-                  replacement: Container(
-                    height: 200,
-                    alignment: Alignment.center,
-                    child: Image.asset(
-                      provider.searching
-                          ? "assets/icons/dice_rolling.gif"
-                          : "assets/icons/double_dice.jpeg",
-                      width: provider.searching ? 80 : 200,
-                    ),
-                  ),
+              ),
+              if (provider.alerts.isNotEmpty)
+                Column(
+                  children: provider.alerts
+                      .map((alert) => PopupNotification(
+                          alert: alert,
+                          onDismiss: () {
+                            provider
+                              ..alerts.remove(alert)
+                              ..onChange();
+                          }))
+                      .toList(),
                 ),
-                if (provider.restaurants.length > 1)
-                  Visibility(
-                    visible:
-                        provider.restaurants.isNotEmpty && !provider.searching,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      alignment: Alignment.center,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed("restaurants/nearby");
-                        },
-                        child: Text(
-                            "see ${provider.restaurants.length - 1}+ other nearby places"),
-                      ),
-                    ),
-                  ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  margin: const EdgeInsets.only(bottom: 60, top: 40),
-                  child: FilledBtn(
-                    onClicked: () => provider.getRestaurants(),
-                    text: "Roll the Dice",
-                    enabled: !provider.searching,
-                  ),
-                ),
-                // Container(
-                //   margin: const EdgeInsets.only(top: 40),
-                //   child: AdWidget(ad: bottomBanner),
-                //   height: bottomBanner.size.height.toDouble(),
-                // ),
-              ],
-            ),
+            ],
           );
         }),
       ),
