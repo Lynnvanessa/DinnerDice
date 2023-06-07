@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     
 jobs:
-  build_ios:
+  build:
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -17,12 +17,30 @@ jobs:
         with:
           flutter-version: '3.3.3'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch
+          architecture: x64
+      - run: flutter --version
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Run tests
-        run: flutter test --coverage
+        run: flutter test
         
-      - name: Build ipa
-        run: flutter build ipa
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+        
+      - name: Build android
+        run: flutter build apk
+      - run: flutter build app bundle
+      
+      - name: Outputs
+      - run: |
+          echo CACHE-PATH=${{ steps.flutter-action.outputs.CACHE-PATH }}
+          echo CACHE-KEY=${{ steps.flutter-action.outputs.CACHE-KEY }}
+          echo CHANNEL=${{ steps.flutter-action.outputs.CHANNEL }}
+          echo VERSION=${{ steps.flutter-action.outputs.VERSION }}
+          echo ARCHITECTURE=${{ steps.flutter-action.outputs.ARCHITECTURE }}
+        shell: bash
