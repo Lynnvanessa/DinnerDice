@@ -1,14 +1,30 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:diner_dice/data/models/nearby_place.dart';
+import 'package:diner_dice/ui/theme/colors.dart';
 import 'package:diner_dice/ui/theme/typography.dart';
 import 'package:diner_dice/ui/widgets/rectangular_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:google_place/google_place.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 
 class RestaurantPreview extends StatelessWidget {
-  const RestaurantPreview(this.restaurant, {Key? key}) : super(key: key);
-  final SearchResult restaurant;
+  const RestaurantPreview(
+    this.restaurant, {
+    Key? key,
+    this.isDiceSelected = false,
+  }) : super(key: key);
+  final NearbyPlace restaurant;
+
+  /// [isDiceSelected] whether it has been selected by the dice roll
+  final bool isDiceSelected;
+
+  void _try() {
+    MapsLauncher.launchCoordinates(
+      restaurant.geometry.location.lat ?? 0,
+      restaurant.geometry.location.lng ?? 0,
+      restaurant.name,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +32,10 @@ class RestaurantPreview extends StatelessWidget {
       margin: const EdgeInsets.all(10),
       padding: const EdgeInsets.all(8),
       width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isDiceSelected ? AppColors.surfaceVariant : null,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
@@ -48,44 +68,48 @@ class RestaurantPreview extends StatelessWidget {
                       ),
                       Text(restaurant.vicinity ?? ""),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            alignment: Alignment.centerRight,
-                            margin: const EdgeInsets.only(top: 8),
-                            child: restaurant.rating == null
-                                ? const Text("No rating")
-                                : Wrap(
-                                    children: [
-                                      RatingBarIndicator(
-                                        itemBuilder: (context, inedx) =>
-                                            const Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              margin: const EdgeInsets.only(top: 8),
+                              child: restaurant.rating == null
+                                  ? const Text("No rating")
+                                  : Wrap(
+                                      children: [
+                                        RatingBarIndicator(
+                                          itemBuilder: (context, inedx) =>
+                                              const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          itemCount: 5,
+                                          itemSize: 20,
+                                          rating: restaurant.rating ?? 0.0,
                                         ),
-                                        itemCount: 5,
-                                        itemSize: 20,
-                                        rating: restaurant.rating ?? 0.0,
-                                      ),
-                                      Text(
-                                          "(${restaurant.rating})(${restaurant.userRatingsTotal})")
-                                    ],
-                                  ),
+                                        Text(
+                                            "(${restaurant.rating})(${restaurant.userRatingTotal})")
+                                      ],
+                                    ),
+                            ),
                           ),
                           Container(
                             margin: const EdgeInsets.only(left: 8),
-                            child: OutlinedButton(
-                              onPressed: () {
-                                MapsLauncher.launchCoordinates(
-                                  restaurant.geometry?.location?.lat ?? 0,
-                                  restaurant.geometry?.location?.lng ?? 0,
-                                );
-                              },
-                              child: const Text(
-                                "Try it!",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                            child: isDiceSelected
+                                ? ElevatedButton(
+                                    onPressed: _try,
+                                    child: const Text(
+                                      "Try it!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : OutlinedButton(
+                                    onPressed: _try,
+                                    child: const Text(
+                                      "Try it!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
                           )
                         ],
                       )
